@@ -17,13 +17,13 @@ pub fn display_summary(
 
     println!("📊 Today's workout data:");
     println!("   Duration: {} minutes", today.duration);
-    println!("   Steps: {:,}", today.steps);
+    println!("   Steps: {:}", today.steps);
     println!("   Heart rate: {} bpm", today.heart_rate);
     println!("   Activity: {} ({})\n", today.activity, today.activity_short);
 
     println!("💪 Weekly progress:");
     println!("   Steps this week: {:?}", weekly_steps);
-    println!("   Daily average: {:,} steps", average_steps);
+    println!("   Daily average: {:} steps", average_steps);
     println!("   Goal progress: {:.2}%\n", goal_progress);
 
     println!("🔥 Calorie calculations:");

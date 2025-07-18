@@ -11,9 +11,10 @@ pub struct TodayStats {
     pub steps: u32,
     pub heart_rate: u32,
     pub activity: String,
-    pub activity_Short: String,
+    pub activity_short: String,
 }
 
+#[derive(Debug)]
 pub enum FitnessLevel {
     Low,
     Moderate,
