@@ -1,6 +1,6 @@
 use crate::types::{Workout, FitnessLevel};
 
-pub fn total_duration(workouts: &[Workout]) -> u32 {
+pub fn total_duration(workouts: &[Workout]) -> i32 {
     workouts.iter().map(|w| w.duration).sum()
 }
 

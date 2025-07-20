@@ -5,7 +5,7 @@ use sqlx::FromRow;
 pub struct Workout {
     pub day: String,
     pub activity: String,
-    pub duration: u32,
+    pub duration: i32,
     pub distance: f32,
     pub calories: f32,
 }

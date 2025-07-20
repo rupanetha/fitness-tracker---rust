@@ -2,37 +2,34 @@ mod types;
 mod calculator;
 mod display;
 mod tracker;
+mod handlers;
 
 use types::{TodayStats, Workout};
 use tracker::FitnessTracker;
+use actix_web::{App, HttpServer, web};
+use sqlx::postgres::PgPoolOptions;
+use dotenv::dotenv;
+use std::env;
 
-fn main() {
-    let workouts = vec! [
-        Workout { day: "Day 1".to_string(), activity: "Running".to_string(), duration: 30, distance: 5.0, calories: 50.0 },
-        Workout { day: "Day 2".to_string(), activity: "Walking".to_string(), duration: 45, distance: 4.0, calories: 16.0 },
-        Workout { day: "Day 3".to_string(), activity: "Cycling".to_string(), duration: 60, distance: 15.0, calories: 105.0 },
-        Workout { day: "Day 4".to_string(), activity: "Yoga".to_string(), duration: 40, distance: 0.0, calories: 2.3 },
-        Workout { day: "Day 5".to_string(), activity: "Strength".to_string(), duration: 50, distance: 0.0, calories: 5.0 },
-    ];
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    let today = TodayStats {
-        duration: 45,
-        steps: 8532,
-        heart_rate: 145,
-        activity: "Running".to_string(),
-        activity_short: "R".to_string()
-    };
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("Failed to connect to database");
 
-    let weekly_steps = vec![8532, 9234, 7845, 9100, 8650, 8920, 8450];
-    let goal = 10000;
+    println!("🚀 Server running on http://localhost:8080");
 
-    let tracker = FitnessTracker {
-        workouts,
-        today,
-        weekly_steps,
-        goal,
-    };
-
-    tracker.display_report();
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(pool.clone()))
+            .service(handlers::summary)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
-

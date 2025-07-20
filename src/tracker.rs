@@ -23,7 +23,7 @@ impl FitnessTracker {
             &self.workouts, 
             &self.today, 
             &self.weekly_steps, 
-            total_duration, 
+            total_duration.try_into().unwrap(), 
             total_distance, 
             total_calories, 
             burned, 
