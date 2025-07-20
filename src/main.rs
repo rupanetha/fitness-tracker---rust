@@ -1,8 +1,9 @@
 mod types;
 mod calculator;
-mod display;
 mod tracker;
 mod handlers;
+mod display;
+
 
 use types::{TodayStats, Workout};
 use tracker::FitnessTracker;
