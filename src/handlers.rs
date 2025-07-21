@@ -6,10 +6,12 @@ use crate::types::Workout;
 
 #[get("/summary")]
 pub async fn summary(pool: web::Data<PgPool>) -> impl Responder {
-    let workouts = sqlx::query_as::<_, Workout>("SELECT * FROM workouts")
-        .fetch_all(pool.get_ref())
-        .await
-        .unwrap_or_default();
+    let workouts: Vec<Workout> = sqlx::query_as::<_, Workout>("SELECT * FROM workouts")
+    .fetch_all(pool.get_ref())
+    .await
+    .unwrap_or_default();
+
+
 
     let today = TodayStats {
         duration: 45,
@@ -27,7 +29,7 @@ pub async fn summary(pool: web::Data<PgPool>) -> impl Responder {
     let total_calories = total_calories(&workouts);
     let avg_steps = average_steps(&weekly_steps);
     let progress = goal_progress(avg_steps, goal);
-    let burned = calories_burned(today.steps, today.duration);
+    let burned = calories_burned(today.steps, today.duration as u32);
     let level = determine_fitness_level(burned);
 
     let response = SummaryResponse {

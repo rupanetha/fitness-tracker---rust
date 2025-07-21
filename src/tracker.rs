@@ -16,16 +16,16 @@ impl FitnessTracker {
         let total_calories = total_calories(&self.workouts);
         let average = average_steps(&self.weekly_steps);
         let progress = goal_progress(average, self.goal);
-        let burned = calories_burned(self.today.steps, self.today.duration);
-        let level = determine_fitness_level(burned);
+        let burned = calories_burned(self.today.steps, self.today.duration as u32);
+        let level = determine_fitness_level(burned.into());
 
         display_summary(
             &self.workouts, 
             &self.today, 
             &self.weekly_steps, 
-            total_duration.try_into().unwrap(), 
+            total_duration as u32, 
             total_distance, 
-            total_calories, 
+            total_calories as f32, 
             burned, 
             &level, 
             progress, 

@@ -7,9 +7,9 @@ pub fn display_summary(
     total_duration: u32,
     total_distance: f32,
     total_calories: f32,
-    calories_today: f32,
+    calories_today: f64,
     fitness_level: &FitnessLevel,
-    goal_progress: f32,
+    goal_progress: f64,
     average_steps: u32,
 ) {
     println!("🏃 Daily Fitness Tracker");

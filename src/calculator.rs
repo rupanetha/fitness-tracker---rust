@@ -17,15 +17,15 @@ pub fn average_steps(steps: &[u32]) -> u32 {
     total / steps.len() as u32
 }
 
-pub fn goal_progress(average_steps: u32, goal: u32) -> f32 {
-    (average_steps as f32 / goal as f32) * 100.0
+pub fn goal_progress(average_steps: u32, goal: u32) -> f64 {
+    (average_steps as f64 / goal as f64) * 100.0
 }
 
-pub fn calories_burned(steps: u32, duration: u32) -> f32 {
-    (steps as f32 * 0.04) + (duration as f32 * 2.0)
+pub fn calories_burned(steps: u32, duration: u32) -> f64 {
+    (steps as f64 * 0.04) + (duration as f64 * 2.0)
 }
 
-pub fn determine_fitness_level(calories: f32) -> FitnessLevel {
+pub fn determine_fitness_level(calories: f64) -> FitnessLevel {
     if calories < 200.0 {
         FitnessLevel::Low
     } else if calories < 500.0 {
