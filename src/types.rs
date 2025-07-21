@@ -2,13 +2,13 @@ use serde::{Serialize, Deserialize};
 use sqlx::FromRow;
 use chrono::NaiveDate;
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct Workout {
     pub id: i32, 
     pub duration: i32,
     pub distance: f32,
     pub calories: f32,
-    pub date: String,
+    pub date: Option<NaiveDate>,
     
 }
 
