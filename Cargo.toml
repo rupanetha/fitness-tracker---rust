@@ -12,3 +12,6 @@ tokio = { version = "1", features = ["full"] }
 dotenv = "0.15"
 actix-rt = "2"
 chrono = { version = "0.4", features = ["serde"] }
+argon2 = "0.5"
+uuid = { version = "1.8", features = ["v4"] }
+rand_core = "0.9.3"

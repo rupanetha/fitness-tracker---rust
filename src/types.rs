@@ -27,7 +27,7 @@ pub struct TodayStats {
 pub struct User {
     pub id: i32,
     pub username: String,
-    pub password_hash: String, 
+    pub password: String, 
 }
 
 #[derive(Debug, Serialize, Deserialize)]

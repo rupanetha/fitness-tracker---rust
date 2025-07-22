@@ -6,13 +6,25 @@ use std::sync::Mutex;
 use crate::types::User;
 
 pub struct FitnessTracker {
+    pub user_id: i32,
     pub workouts: Vec<Workout>,
     pub today: TodayStats,
     pub weekly_steps: Vec<u32>,
     pub goal: u32,
 }
 
+
 impl FitnessTracker {
+    pub fn new(user_id: i32, today: TodayStats, goal: u32) -> Self {
+        FitnessTracker {
+            user_id,
+            workouts: Vec::new(),
+            today,
+            weekly_steps: Vec::new(),
+            goal,
+        }
+    }
+
     pub fn display_report(&self) {
         let total_duration = total_duration(&self.workouts);
         let total_distance = total_distance(&self.workouts);
@@ -34,6 +46,20 @@ impl FitnessTracker {
             progress, 
             average,
         );
+    }
+
+    pub fn add_workout(&mut self, workout: Workout) {
+        if workout.user_id == self.user_id {
+            self.workouts.push(workout);
+        }
+    }
+
+    pub fn update_today_stats(&mut self, stats: TodayStats) {
+        self.today = stats;
+    }
+
+    pub fn update_weekly_steps(&mut self, steps: Vec<u32>) {
+        self.weekly_steps = steps;
     }
 }
 

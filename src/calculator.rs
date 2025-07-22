@@ -13,11 +13,17 @@ pub fn total_calories(workouts: &[Workout]) -> f32 {
 }
 
 pub fn average_steps(steps: &[u32]) -> u32 {
-    let total:u32 = steps.iter().sum();
+    if steps.is_empty() {
+        return 0;
+    }
+    let total: u32 = steps.iter().sum();
     total / steps.len() as u32
 }
 
 pub fn goal_progress(average_steps: u32, goal: u32) -> f64 {
+    if goal == 0 {
+        return 0.0;
+    }
     (average_steps as f64 / goal as f64) * 100.0
 }
 
