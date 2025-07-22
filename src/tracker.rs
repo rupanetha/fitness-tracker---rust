@@ -1,6 +1,9 @@
 use crate::types::{Workout, TodayStats, FitnessLevel};
 use crate::calculator::*;
 use crate::display::display_summary;
+use std::collections::HashMap;
+use std::sync::Mutex;
+use crate::types::User;
 
 pub struct FitnessTracker {
     pub workouts: Vec<Workout>,
@@ -33,3 +36,5 @@ impl FitnessTracker {
         );
     }
 }
+
+
