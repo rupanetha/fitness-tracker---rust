@@ -2,12 +2,8 @@ use actix_web::{get, post, web, Responder, HttpResponse};
 use sqlx::PgPool;
 use crate::types::{TodayStats, SummaryResponse, Workout, User, LoginRequest, RegisterRequest};
 use crate::calculator::*;
-use argon2::{
-    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
-    Argon2,
-};
 use uuid::Uuid;
-use rand_core::{OsRng, RngCore}; 
+use argon2::{Argon2, password_hash::{PasswordHash, PasswordVerifier, PasswordHasher, SaltString}};
 use rand::rngs::OsRng;
 
 #[get("/summary")]
@@ -115,20 +111,22 @@ pub async fn login_user(
     }
 }
 
-// ========== Password Helpers ==========
-fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
-    let mut salt_bytes = [0u8; 16];
-    OsRng.fill_bytes(&mut salt_bytes); // Manual generation
-    let salt = SaltString::b64_encode(&salt_bytes)?; // This avoids `SaltString::generate`
+#[post("/logout")]
+pub async fn logout_user() -> impl Responder {
+    HttpResponse::Ok().body("User logged out successfully")
+}
 
+// ========== Password Helpers ==========
+pub fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
+    let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
     let hash = argon2.hash_password(password.as_bytes(), &salt)?.to_string();
     Ok(hash)
 }
 
-
-fn verify_password(password: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
+pub fn verify_password(password: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
     let parsed = PasswordHash::new(hash)?;
     Ok(Argon2::default().verify_password(password.as_bytes(), &parsed).is_ok())
 }
+
 

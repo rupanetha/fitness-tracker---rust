@@ -38,9 +38,9 @@ async fn main() -> std::io::Result<()> {
                 secret_key.clone(),
             ))
             .wrap(IdentityMiddleware::default())
-            .service(handlers::register)
-            .service(handlers::login)
-            .service(handlers::logout)
+            .service(handlers::register_user)
+            .service(handlers::login_user)
+            .service(handlers::logout_user)
             .service(handlers::summary)
     })
     .bind(("127.0.0.1", 8080))?
