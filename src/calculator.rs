@@ -1,5 +1,8 @@
 use crate::types::{Workout, FitnessLevel};
 
+const CALORIES_PER_STEP: f64 = 0.04;
+const CALORIES_PER_MINUTE: f64 = 2.0;
+
 pub fn total_duration(workouts: &[Workout]) -> i32 {
     workouts.iter().map(|w| w.duration).sum()
 }
@@ -28,7 +31,7 @@ pub fn goal_progress(average_steps: u32, goal: u32) -> f64 {
 }
 
 pub fn calories_burned(steps: u32, duration: u32) -> f64 {
-    (steps as f64 * 0.04) + (duration as f64 * 2.0)
+    (steps as f64 * CALORIES_PER_STEP) + (duration as f64 * CALORIES_PER_MINUTE)
 }
 
 pub fn determine_fitness_level(calories: f64) -> FitnessLevel {
@@ -40,4 +43,5 @@ pub fn determine_fitness_level(calories: f64) -> FitnessLevel {
         FitnessLevel::High
     }
 }
+
 

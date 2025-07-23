@@ -2,8 +2,13 @@ use actix_web::{get, post, web, Responder, HttpResponse};
 use sqlx::PgPool;
 use crate::types::{TodayStats, SummaryResponse, Workout, User, LoginRequest, RegisterRequest};
 use crate::calculator::*;
-use argon2::{self};
+use argon2::{
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
 use uuid::Uuid;
+use rand_core::{OsRng, RngCore}; 
+use rand::rngs::OsRng;
 
 #[get("/summary")]
 pub async fn summary(
@@ -58,61 +63,72 @@ pub struct SummaryQuery {
     pub user_id: i32,
 }
 
-// #[post("/register")]
-// pub async fn register_user(
-//     pool: web::Data<PgPool>,
-//     data: web::Json<RegisterRequest>,
-// ) -> impl Responder {
-//     let hashed = hash_password(&data.password);
+#[post("/register")]
+pub async fn register_user(
+    pool: web::Data<PgPool>,
+    data: web::Json<RegisterRequest>,
+) -> impl Responder {
+    match hash_password(&data.password) {
+        Ok(hashed) => {
+            let user = sqlx::query_as::<_, User>(
+                "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *"
+            )
+            .bind(&data.username)
+            .bind(&hashed)
+            .fetch_one(pool.get_ref())
+            .await;
 
-//     let user = sqlx::query_as::<_, User>(
-//         "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *"
-//     )
-//     .bind(&data.username)
-//     .bind(&hashed)
-//     .fetch_one(pool.get_ref())
-//     .await;
+            match user {
+                Ok(u) => HttpResponse::Ok().json(u),
+                Err(e) => {
+                    eprintln!("DB Error: {:?}", e);
+                    HttpResponse::InternalServerError().body("Could not register user")
+                },
+            }
+        }
+        Err(e) => {
+            eprintln!("Hash Error: {:?}", e);
+            HttpResponse::InternalServerError().body("Password hashing failed")
+        }
+    }
+}
 
-//     match user {
-//         Ok(u) => HttpResponse::Ok().json(u),
-//         Err(_) => HttpResponse::InternalServerError().body("Could not register user"),
-//     }
-// }
 
-// #[post("/login")]
-// pub async fn login_user(
-//     pool: web::Data<PgPool>,
-//     data: web::Json<LoginRequest>,
-// ) -> impl Responder {
-//     let user = sqlx::query_as::<_, User>(
-//         "SELECT * FROM users WHERE username = $1"
-//     )
-//     .bind(&data.username)
-//     .fetch_optional(pool.get_ref())
-//     .await;
+#[post("/login")]
+pub async fn login_user(
+    pool: web::Data<PgPool>,
+    data: web::Json<LoginRequest>,
+) -> impl Responder {
+    let user = sqlx::query_as::<_, User>(
+        "SELECT * FROM users WHERE username = $1"
+    )
+    .bind(&data.username)
+    .fetch_optional(pool.get_ref())
+    .await;
 
-//     match user {
-//         Ok(Some(u)) => {
-//             if verify_password(&data.password, &u.password) {
-//                 HttpResponse::Ok().json(u)
-//             } else {
-//                 HttpResponse::Unauthorized().body("Invalid credentials")
-//             }
-//         },
-//         _ => HttpResponse::Unauthorized().body("Invalid credentials"),
-//     }
-// }
+    match user {
+        Ok(Some(u)) => match verify_password(&data.password, &u.password) {
+            Ok(true) => HttpResponse::Ok().json(u),
+            _ => HttpResponse::Unauthorized().body("Invalid credentials"),
+        },
+        _ => HttpResponse::Unauthorized().body("Invalid credentials"),
+    }
+}
 
-// // ========== Password Helpers ==========
-// fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
-//     let salt = SaltString::generate(&mut OsRng);
-//     let argon2 = Argon2::default();
+// ========== Password Helpers ==========
+fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
+    let mut salt_bytes = [0u8; 16];
+    OsRng.fill_bytes(&mut salt_bytes); // Manual generation
+    let salt = SaltString::b64_encode(&salt_bytes)?; // This avoids `SaltString::generate`
 
-//     let password_hash = argon2.hash_password(password.as_bytes(), &salt)?.to_string();
-//     Ok(password_hash)
-// }
+    let argon2 = Argon2::default();
+    let hash = argon2.hash_password(password.as_bytes(), &salt)?.to_string();
+    Ok(hash)
+}
 
-// fn verify_password(password: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
-//     let parsed_hash = PasswordHash::new(hash)?;
-//     Ok(Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok())
-// }
+
+fn verify_password(password: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
+    let parsed = PasswordHash::new(hash)?;
+    Ok(Argon2::default().verify_password(password.as_bytes(), &parsed).is_ok())
+}
+

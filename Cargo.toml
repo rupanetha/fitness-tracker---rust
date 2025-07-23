@@ -14,4 +14,11 @@ actix-rt = "2"
 chrono = { version = "0.4", features = ["serde"] }
 argon2 = "0.5"
 uuid = { version = "1.8", features = ["v4"] }
-rand_core = "0.9.3"
+rand_core = "=0.6.4"
+actix-session = "0.9"
+actix-identity = "0.7"
+cookie = "0.17"
+password-hash = "0.5"
+
+[patch.crates-io]
+rand_core = { version = "=0.6.4" }
