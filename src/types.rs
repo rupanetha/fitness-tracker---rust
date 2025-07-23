@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 use sqlx::FromRow;
 use chrono::NaiveDate;
+use uuid::Uuid;
 
 // Workout Data
 #[derive(Debug, sqlx::FromRow)]
@@ -25,9 +26,9 @@ pub struct TodayStats {
 // User Athentication
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
-    pub id: i32,
+    pub id: Uuid,
     pub username: String,
-    pub password: String, 
+    pub password_hash: String, 
 }
 
 #[derive(Debug, Serialize, Deserialize)]

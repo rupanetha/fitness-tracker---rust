@@ -14,7 +14,7 @@ pub async fn summary(
     let user_id = query.user_id;
 
     let workouts: Vec<Workout> = sqlx::query_as::<_, Workout>(
-        "SELECT * FROM workouts WHERE user_id = $1"
+        "SELECT id, user_id, distance, duration, calories FROM FROM workouts WHERE user_id = $1"
     )
     .bind(user_id)
     .fetch_all(pool.get_ref())
@@ -67,7 +67,7 @@ pub async fn register_user(
     match hash_password(&data.password) {
         Ok(hashed) => {
             let user = sqlx::query_as::<_, User>(
-                "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *"
+                "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING *"
             )
             .bind(&data.username)
             .bind(&hashed)
@@ -103,7 +103,7 @@ pub async fn login_user(
     .await;
 
     match user {
-        Ok(Some(u)) => match verify_password(&data.password, &u.password) {
+        Ok(Some(u)) => match verify_password(&data.password, &u.password_hash) {
             Ok(true) => HttpResponse::Ok().json(u),
             _ => HttpResponse::Unauthorized().body("Invalid credentials"),
         },
