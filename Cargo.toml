@@ -20,4 +20,6 @@ actix-identity = "0.7"
 cookie = "0.17"
 password-hash = "0.5"
 rand = "0.8"
+jsonwebtoken = "8"
+
 

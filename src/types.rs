@@ -3,6 +3,8 @@ use sqlx::FromRow;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
+
+
 // Workout Data
 #[derive(Debug, sqlx::FromRow)]
 pub struct Workout {
@@ -46,7 +48,14 @@ pub struct LoginRequest {
 #[derive(Debug, Serialize)]
 pub struct AuthResponse {
     pub message: String,
-    pub user_id: i32,
+    pub token: String, // Return JWT token instead of user_id
+}
+
+// JWT Claims 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,  // usually user ID
+    pub exp: usize,   // expiration timestamp
 }
 
 // Summary Response

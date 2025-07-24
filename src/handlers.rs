@@ -5,6 +5,11 @@ use crate::calculator::*;
 use uuid::Uuid;
 use argon2::{Argon2, password_hash::{PasswordHash, PasswordVerifier, PasswordHasher, SaltString}};
 use rand::rngs::OsRng;
+use jsonwebtoken::{encode, EncodingKey, Header};
+use std::env;
+use chrono::{Utc, Duration};
+use crate::types::{Claims, AuthResponse};
+
 
 #[get("/summary")]
 pub async fn summary(
@@ -90,6 +95,7 @@ pub async fn register_user(
 }
 
 
+
 #[post("/login")]
 pub async fn login_user(
     pool: web::Data<PgPool>,
@@ -104,7 +110,31 @@ pub async fn login_user(
 
     match user {
         Ok(Some(u)) => match verify_password(&data.password, &u.password_hash) {
-            Ok(true) => HttpResponse::Ok().json(u),
+            Ok(true) => {
+                // JWT token creation
+                let secret = env::var("JWT_SECRET").unwrap_or("secret".into());
+                let expiration = Utc::now()
+                    .checked_add_signed(Duration::hours(24))
+                    .expect("valid timestamp")
+                    .timestamp() as usize;
+
+                let claims = Claims {
+                    sub: u.id.to_string(),
+                    exp: expiration,
+                };
+
+                let token = encode(
+                    &Header::default(),
+                    &claims,
+                    &EncodingKey::from_secret(secret.as_bytes()),
+                )
+                .unwrap();
+
+                HttpResponse::Ok().json(AuthResponse {
+                    message: "Login successful".to_string(),
+                    token,
+                })
+            },
             _ => HttpResponse::Unauthorized().body("Invalid credentials"),
         },
         _ => HttpResponse::Unauthorized().body("Invalid credentials"),
@@ -128,5 +158,6 @@ pub fn verify_password(password: &str, hash: &str) -> Result<bool, argon2::passw
     let parsed = PasswordHash::new(hash)?;
     Ok(Argon2::default().verify_password(password.as_bytes(), &parsed).is_ok())
 }
+
 
 
