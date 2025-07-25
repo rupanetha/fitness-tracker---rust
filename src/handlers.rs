@@ -95,13 +95,12 @@ pub async fn register_user(
 }
 
 
-
 #[post("/login")]
 pub async fn login_user(
     pool: web::Data<PgPool>,
     data: web::Json<LoginRequest>,
 ) -> impl Responder {
-    let user = sqlx::query_as::<_, User>(
+    let user: Result<Option<User>, sqlx::Error> = sqlx::query_as::<_, User>(
         "SELECT * FROM users WHERE username = $1"
     )
     .bind(&data.username)
